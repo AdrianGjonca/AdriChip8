@@ -11,7 +11,7 @@ void load_program(const char * program_loc) {
 	FILE * file_ptr;
 	file_ptr = fopen(program_loc, "rb");
 	if(file_ptr == NULL){
-		printf("ERROR: %s does not exist!\nTerminating Program\n", program_loc);
+		fprintf(stderr, "ERROR: %s does not exist!\nTerminating Program\n", program_loc);
 		exit(1);
 	}
 
