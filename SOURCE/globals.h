@@ -51,9 +51,18 @@ extern const uint8_t FONT_DATA [];
 
 //EXTERNS: memory.c
 extern void setup_memory();
+extern void setup_registers();
 extern void load_program();
+extern uint16_t wordat(int address);
 
 //EXTERNS: ppu.c
 extern void ppu_update();
 extern void ppu_setpx(int x, int y, cell_t cell);
+extern void ppu_clear();
+
+//EXTERNS: cpu.c
+extern int shift_g;
+extern int jumpquirk_g;
+extern void cpu_cycle();
+
 #endif
