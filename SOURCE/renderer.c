@@ -72,10 +72,10 @@ void renderer_loop(void (*onEvent)(SDL_Event), void (*onFrame)()) {
 
 void blot_white(int x, int y) {
 	SDL_Rect blot = {
-		.x = x * (main_rect.w/DISP_W) + main_rect.x,
-		.y = y * (main_rect.y/DISP_H) + main_rect.y,
-		.w = (main_rect.w/DISP_W),
-		.h = (main_rect.h/DISP_H)
+		.x = x * ((float)main_rect.w/DISP_W) + main_rect.x,
+		.y = y * ((float)main_rect.h/DISP_H) + main_rect.y,
+		.w = ((float)main_rect.w/DISP_W)+1,
+		.h = ((float)main_rect.h/DISP_H)+1
 	};
 	SDL_SetRenderDrawColor(renderer, 200, 200, 180, 255);
 	SDL_RenderFillRect(renderer, &blot);
@@ -83,10 +83,10 @@ void blot_white(int x, int y) {
 
 void blot_black(int x, int y) {
 	SDL_Rect blot = {
-		.x = x * (main_rect.w/DISP_W) + main_rect.x,
-		.y = y * (main_rect.y/DISP_H) + main_rect.y,
-		.w = (main_rect.w/DISP_W),
-		.h = (main_rect.h/DISP_H)
+		.x = x * ((float)main_rect.w/DISP_W) + main_rect.x,
+		.y = y * ((float)main_rect.h/DISP_H) + main_rect.y,
+		.w = ((float)main_rect.w/DISP_W)+1,
+		.h = ((float)main_rect.h/DISP_H)+1
 	};
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 	SDL_RenderFillRect(renderer, &blot);

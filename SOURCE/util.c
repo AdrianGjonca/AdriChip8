@@ -19,3 +19,15 @@ void print_mem() {
 	}
 
 }
+
+void checkerboard() {
+	for(int x = 0; x<DISP_W; x++) {
+		for(int y = 0; y<DISP_H; y++) {
+			if((x%2)^(y%2)) {
+				ppu_setpx(x,y, CELL_ON);
+			}else {
+				ppu_setpx(x,y, CELL_OFF);
+			}
+		}
+	}
+}

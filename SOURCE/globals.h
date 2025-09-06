@@ -17,8 +17,8 @@
 #define PROGRAM_START 0x200
 
 typedef int cell_t;
-#define CELL_ON 1;
-#define CELL_OF 0;
+#define CELL_ON 1
+#define CELL_OFF 0
 
 //EXTERNS: internal_globals.c
 extern cell_t screen_g [DISP_SIZE];
@@ -52,4 +52,8 @@ extern const uint8_t FONT_DATA [];
 //EXTERNS: memory.c
 extern void setup_memory();
 extern void load_program();
+
+//EXTERNS: ppu.c
+extern void ppu_update();
+extern void ppu_setpx(int x, int y, cell_t cell);
 #endif

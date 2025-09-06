@@ -5,13 +5,12 @@
 #include "globals.h"
 #include "util.h"
 
-void a(SDL_Event event) {
+void onEvent(SDL_Event event) {
 
 }
 
-void b() {
-	blot_white(10,0);
-	blot_white(0,10);
+void onFrame() {
+	ppu_update();
 }
 
 int main(int argc, char * argv[]) {
@@ -24,14 +23,16 @@ int main(int argc, char * argv[]) {
 		return 1;
 	}
 
-	printf("Initializing game memory.\n");
+	printf("Initializing system memory.\n");
 	setup_memory();
 	load_program(argv[1]);
-	print_mem();
+	//print_mem();
+
+	checkerboard();
 
 	printf("Initializing SDL2 environment.\n");
 	renderer_init();
-	renderer_loop(a,b);
+	renderer_loop(onEvent,onFrame);
 	
 	return 0;
 }
