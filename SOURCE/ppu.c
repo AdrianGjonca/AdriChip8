@@ -19,7 +19,7 @@ void ppu_update() {
 
 uint8_t ppu_setpx(int x, int y, cell_t cell) {
 	uint8_t output = 0;
-	if(x > 0 && y > 0 && x < DISP_W && y < DISP_H) {
+	if(x >= 0 && y >= 0 && x < DISP_W && y < DISP_H) {
 		int i = x + (y * DISP_W);
 		int to_set = cell ^ screen_g[i];
 		if(cell == CELL_OFF && to_set == CELL_ON)

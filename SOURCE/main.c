@@ -28,7 +28,6 @@ void onFrame() {
 		cpu_cycle();
 		next_9inst = clock() + (CLOCKS_PER_SEC/100);
 	}
-
 	ppu_update();
 }
 
