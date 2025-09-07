@@ -148,7 +148,7 @@ void cpu_cycle() {
 			}else if(nn == 0x00EE) { //RETURN
 				PC_g = stack_g[stack_top_g];
 				stack_top_g--;
-				printf("Return");
+				printf("Return\n");
 			}else{ //MACHINE ROUTINE
 				//TODO potentially something here?
 			}

@@ -22,7 +22,7 @@ uint8_t ppu_setpx(int x, int y, cell_t cell) {
 	if(x >= 0 && y >= 0 && x < DISP_W && y < DISP_H) {
 		int i = x + (y * DISP_W);
 		int to_set = cell ^ screen_g[i];
-		if(cell == CELL_OFF && to_set == CELL_ON)
+		if(screen_g[i] == CELL_ON && to_set == CELL_OFF)
 			output = 1;
 		screen_g[i] = to_set;
 	}
