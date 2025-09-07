@@ -1,10 +1,15 @@
 #include "globals.h"
+#include "keys.h"
 #include <stdio.h>
 #include <stdlib.h>
 
 int shift_g = 0;
 int jumpquirk_g = 0;
 int adjustIR_g = 0;
+int amigaquirk_g = 0;
+
+int isWaiting_g = 0;
+int waitingFor_g = 0;
 
 static uint8_t value(int reg);
 static void set(int reg, uint8_t val);
@@ -80,6 +85,36 @@ void set(int reg, uint8_t val) {
 }
 
 void cpu_cycle() {
+	if(isWaiting_g) {
+		switch(waitingFor_g) {
+			case 0x0: if(key0_g) isWaiting_g = 0; break;
+			case 0x1: if(key1_g) isWaiting_g = 0; break;
+			case 0x2: if(key2_g) isWaiting_g = 0; break;
+			case 0x3: if(key3_g) isWaiting_g = 0; break;
+
+			case 0x4: if(key4_g) isWaiting_g = 0; break;
+			case 0x5: if(key5_g) isWaiting_g = 0; break;
+			case 0x6: if(key6_g) isWaiting_g = 0; break;
+			case 0x7: if(key7_g) isWaiting_g = 0; break;
+					  
+			case 0x8: if(key8_g) isWaiting_g = 0; break;
+			case 0x9: if(key9_g) isWaiting_g = 0; break;
+			case 0xA: if(keyA_g) isWaiting_g = 0; break;
+			case 0xB: if(keyB_g) isWaiting_g = 0; break;
+
+			case 0xC: if(keyC_g) isWaiting_g = 0; break;
+			case 0xD: if(keyD_g) isWaiting_g = 0; break;
+			case 0xE: if(keyE_g) isWaiting_g = 0; break;
+			case 0xF: if(keyF_g) isWaiting_g = 0; break;
+		}
+		if(isWaiting_g) {
+			printf("WAITING FOR KEY %01X\n", waitingFor_g);
+			return;
+		}else{
+			printf("Key %01X has been recieved! Resuming execution.\n", waitingFor_g);
+		}
+	}
+
 	//FETCH
 	uint16_t operation = wordat(PC_g);
 	PC_g += 2;
@@ -239,15 +274,39 @@ void cpu_cycle() {
 			set(nib2, nn & rand());
 			break;
 		case 0xD: // Draw(VY, VY, nib4, IR)
-			//TODO Handle overlap
 			printf("DRAW\n");
 			draw(nib2, nib3, nib4);
 			break;
 		case 0xE:
+			int is_pressed = 0;
+			switch(value(nib2)) {
+				case 0x0: is_pressed = key0_g; break;
+				case 0x1: is_pressed = key1_g; break;
+				case 0x2: is_pressed = key2_g; break;
+				case 0x3: is_pressed = key3_g; break;
+
+				case 0x4: is_pressed = key4_g; break;
+				case 0x5: is_pressed = key5_g; break;
+				case 0x6: is_pressed = key6_g; break;
+				case 0x7: is_pressed = key7_g; break;
+					  
+				case 0x8: is_pressed = key8_g; break;
+				case 0x9: is_pressed = key9_g; break;
+				case 0xA: is_pressed = keyA_g; break;
+				case 0xB: is_pressed = keyB_g; break;
+
+				case 0xC: is_pressed = keyC_g; break;
+				case 0xD: is_pressed = keyD_g; break;
+				case 0xE: is_pressed = keyE_g; break;
+				case 0xF: is_pressed = keyF_g; break;
+			}
+
 			if(nn == 0x9E) {
-				//TODO SKIP IF KEY
+				if(is_pressed)
+					PC_g += 2;
 			}else if(nn = 0xA1) {
-				//TODO SKIP IF NOT KEY
+				if(!is_pressed)
+					PC_g += 2;
 			}
 			break;
 		case 0xF:
@@ -265,14 +324,14 @@ void cpu_cycle() {
 					IR_g += value(nib2);
 					if(IR_g > 0xFF) {
 						IR_g % 0x100;
-						VF_g = 1;
+						if(amigaquirk_g) VF_g = 1;
 					}else {
-						VF_g = 0;
+						if(amigaquirk_g) VF_g = 0;
 					}
 					break;
 				case 0x0A:
-					//while(1);
-					//TODO WAIT FOR KEY
+					waitingFor_g = value(nib2);
+					isWaiting_g = 1;
 					break;
 				case 0x29:
 					IR_g = value(nib2) * 5 + FONT_START;
@@ -287,14 +346,14 @@ void cpu_cycle() {
 					for(i = 0; i <= nib2; i++, IR_g++) {
 						memory_g[IR_g] = value(i);
 					}
-					if(!adjustIR_g) IR_g-=i;
+					if(adjustIR_g) IR_g-=i;
 					break;
 				case 0x65:
 					int j;
 					for(j = 0; j <= nib2; j++, IR_g++) {
 						set(j, memory_g[IR_g]);
 					}
-					if(!adjustIR_g) IR_g-=j;
+					if(adjustIR_g) IR_g-=j;
 					break;
 			}
 			break;

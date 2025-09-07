@@ -5,12 +5,50 @@
 #include <time.h>
 #include "globals.h"
 #include "util.h"
+#include "keys.h"
 
 clock_t next_tick = 0;
 clock_t next_9inst = 0;
 
-void onEvent(SDL_Event event) {
+// 1 2 3 C
+// 4 5 6 D
+// 7 8 9 E
+// A 0 B F
+//
+// 1 2 3 4
+// q w e r
+// a s d f
+// z x c v
 
+
+void onEvent(SDL_Event event) {
+	if(event.type == SDL_KEYDOWN || event.type == SDL_KEYUP) {
+		SDL_KeyboardEvent kevent = event.key;
+		SDL_Keycode keycode = kevent.keysym.sym;
+		int setval = event.type == SDL_KEYDOWN;
+
+		switch(keycode) {
+			case '1': key1_g = setval; break;
+			case '2': key2_g = setval; break;
+			case '3': key3_g = setval; break;
+			case '4': keyC_g = setval; break;
+
+			case 'q': key4_g = setval; break;
+			case 'w': key5_g = setval; break;
+			case 'e': key6_g = setval; break;
+			case 'r': keyD_g = setval; break;
+
+			case 'a': key7_g = setval; break;
+			case 's': key8_g = setval; break;
+			case 'd': key9_g = setval; break;
+			case 'f': keyE_g = setval; break;
+
+			case 'z': keyA_g = setval; break;
+			case 'x': key0_g = setval; break;
+			case 'c': keyB_g = setval; break;
+			case 'v': keyF_g = setval; break;
+		}
+	}
 }
 
 void onFrame() {
