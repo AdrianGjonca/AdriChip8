@@ -4,9 +4,12 @@
 
 int shift_g = 0;
 int jumpquirk_g = 0;
+int adjustIR_g = 0;
 
 static uint8_t value(int reg);
+static void set(int reg, uint8_t val);
 void draw(int nib2, int nib3, int nib4) {
+	uint8_t output = 0;
 	int x = value(nib2) % DISP_W;
 	int y = value(nib3) % DISP_H;
 	
@@ -21,18 +24,17 @@ void draw(int nib2, int nib3, int nib4) {
 		cell_t _6 = 2   & row ? CELL_ON : CELL_OFF;
 		cell_t _7 = 1   & row ? CELL_ON : CELL_OFF;
 
-		ppu_setpx(x+0,y+i,_0);
-		ppu_setpx(x+1,y+i,_1);
-		ppu_setpx(x+2,y+i,_2);
-		ppu_setpx(x+3,y+i,_3);
-		ppu_setpx(x+4,y+i,_4);
-		ppu_setpx(x+5,y+i,_5);
-		ppu_setpx(x+6,y+i,_6);
-		ppu_setpx(x+7,y+i,_7);
-
+		output |= ppu_setpx(x+0,y+i,_0);
+		output |= ppu_setpx(x+1,y+i,_1);
+		output |= ppu_setpx(x+2,y+i,_2);
+		output |= ppu_setpx(x+3,y+i,_3);
+		output |= ppu_setpx(x+4,y+i,_4);
+		output |= ppu_setpx(x+5,y+i,_5);
+		output |= ppu_setpx(x+6,y+i,_6);
+		output |= ppu_setpx(x+7,y+i,_7);
 	}
 
-
+	set(0xF, output);
 }
 
 uint8_t value(int reg) {
@@ -82,118 +84,163 @@ void cpu_cycle() {
 	uint16_t operation = wordat(PC_g);
 	PC_g += 2;
 
-	//printf("%03X : %04X\n", PC_g-2, operation);
+	printf("%03X : %04X\n", PC_g-2, operation);
+	printf(
+		"V0:%02X V1:%02X V2:%02X V3:%02X V4:%02X V5:%02X V6:%02X V7:%02X\n"
+		"V8:%02X V9:%02X VA:%02X VB:%02X VC:%02X VD:%02X VE:%02X VF:%02X\n",
+		V0_g, V1_g, V2_g, V3_g, V4_g, V5_g, V6_g, V7_g,
+		V8_g, V9_g, VA_g, VB_g, VC_g, VD_g, VE_g, VF_g
+	);
+
+	printf("StackTop : %d\n", stack_top_g);
 
 	//DECODE & EXECUTE
-	int nib1 = (0xF000 & operation) >> 12;
+        int nib1 = (0xF000 & operation) >> 12;
 	int nib2 = (0x0F00 & operation) >> 8;
 	int nib3 = (0x00F0 & operation) >> 4;
 	int nib4 = (0x000F & operation);
 
-	//printf("%01X %01X %01X %01X\n", nib1, nib2, nib3, nib4);
+	printf("%01X %01X %01X %01X\n", nib1, nib2, nib3, nib4);
 
 	int addr = 0x0FFF & operation;
 	uint8_t nn = 0x00FF & operation;
 
 	switch(nib1){
 		case 0:
-			if(operation == 0x00E0) { //CLEAR
+			if(nn == 0xE0) { //CLEAR
 				ppu_clear(); 
-			}else if(operation == 0x00EE) { //RETURN
+				printf("Clear\n");
+			}else if(nn == 0x00EE) { //RETURN
 				PC_g = stack_g[stack_top_g];
 				stack_top_g--;
+				printf("Return");
 			}else{ //MACHINE ROUTINE
 				//TODO potentially something here?
 			}
 			break;	
 		case 1: //JUMP NNN
 			PC_g = addr;
-			//printf("Jumping to %03X\n", PC_g);
+			printf("Jumping to %03X\n", PC_g);
 			break;
 		case 2: //CALL NNN
 			stack_g[stack_top_g+1] = PC_g;
 			stack_top_g++;
 			PC_g = addr;
+			printf("Calling to %03X\n", PC_g);
 			break;
-		case 3: //SKIPIF VX = NN
-			if(value(nib2) == nn) 
+		case 3: //SKIPIF VX == NN
+			printf("Skip if V%01X == %02X\n", nib2, nn);
+			if(value(nib2) == nn) {
 				PC_g += 2;
+				printf("Skipped\n");
+			}
 			break;
 		case 4: //SKIPIF VX != NN
-			if(value(nib2) != nn)
+			printf("Skip if V%01X != %02X\n", nib2, nn);
+			if(value(nib2) != nn) {
 				PC_g += 2;
+				printf("Skipped\n");
+			}
 			break;
 		case 5: //SKIPIF VX == XY
-			if(value(nib2) == value(nib3))
+			printf("Skip if V%01X == V%01X\n", nib2, nib3);
+			if(value(nib2) == value(nib3)) {
 				PC_g += 2;
+				printf("Skipped\n");
+			}
 			break;
 		case 6: //VX = NN
+			printf("Set V%01X to %02X\n", nib2, nn);
 			set(nib2, nn);
 			break;
 		case 7: //VX += NN
+			printf("Add to V%01X value %02X\n", nib2, nn);
 			set(nib2, value(nib2) + nn); //we discard the carry!!
 			break;
 		case 8: 
 			switch(nib4) {
 				case 0: //VX = VY
+					printf("Set V%01X to V%01X\n", nib2, nib3);
 					set(nib2, nib3);
 					break;
 				case 1: //VX |= VY
+					printf("V%01X |= V%01X\n", nib2, nib3);
 					set(nib2, value(nib2) | value(nib3));
 					break;
 				case 2: //VX &= VY
+					printf("V%01X &= V%01X\n", nib2, nib3);
 					set(nib2, value(nib2) & value(nib3));
 					break;
 				case 3: //VX ^= VY
+					printf("V%01X ^= V%01X\n", nib2, nib3);
 					set(nib2, value(nib2) ^ value(nib3));
 					break;
 				case 4: //VX += VY
+					printf("V%01X += V%01X\n", nib2, nib3);
 					int sum = (int) value(nib2) + (int) value(nib3);
 					if(sum > 255) VF_g = 1;
 					else VF_g = 0;
 					set(nib2, (uint8_t)sum); //Intentional truncation
 					break;
 				case 5: //VX = VX - VY
+					printf("V%01X -= V%01X\n", nib2, nib3);
 					set(nib2, value(nib2) - value(nib3));
 					VF_g = value(nib2) > value(nib3);
 					break;
 				case 6: //RSHIFT 
-					if(shift_g == 0)
+					if(shift_g == 0) {
+						printf("V%01X = V%01X >> 1\n", nib2, nib3);
 						set(nib2, value(nib3));
+					} else {
+						printf("V%01X = V%01X >> 1\n", nib2, nib2);
+					}
 					VF_g = nib2 & 0x01;
 					set(nib2, value(nib2) >> 1);
 					break;				
 				case 7: //VX = VY - VX
+					printf("V%01X = V%01X - V%01X\n", nib2, nib3, nib2);
 					set(nib2, value(nib3) - value(nib2));
 					VF_g = value(nib3) > value(nib2);
 					break;
 				case 0xE://LSHIFT 
-					if(shift_g == 0)
+					if(shift_g == 0) {
+						printf("V%01X = V%01X << 1\n", nib2, nib3);
 						set(nib2, value(nib3));
-					int shift = value(nib2) << 1;
+					} else {
+						printf("V%01X = V%01X << 1\n", nib2, nib2);
+					}
+					int shift = (int)value(nib2) << 1;
 					VF_g = shift & 0xFF00 != 0;
 					set(nib2, shift);
 					break;
 			}
 			break;
 		case 9: //SKIPIF VX != XY
+			printf("Skip if V%01X != V%01X\n", nib2, nib3);
 			if(value(nib2) != value(nib3))
 				PC_g += 2;
 			break;
 
 		case 0xA: //IR = addr
+			printf("IR = %03X\n", addr);
 			IR_g = addr;
 			break;
 		case 0xB: // PC = V0 + addr (or V0 + nn + VX)
-			if(jumpquirk_g) 
-				PC_g = V0_g + addr;
-			else
+			if(jumpquirk_g) { 
+				printf("Jumping to V0 + %02X + V%01X\n", nn, nib2);
 				PC_g = V0_g + nn + value(nib2);
+			} else {
+				printf("Jumping to V0 + %03X\n", addr);
+				PC_g = V0_g + addr;
+			}
 			break;
 		case 0xC: // VX = NN & rand()
+			printf("V%01X = %02X & rand()\n", nib2, nn);
 			set(nib2, nn & rand());
 			break;
 		case 0xD: // Draw(VY, VY, nib4, IR)
+			//TODO Handle overlap
+			printf("DRAW\n");
 			draw(nib2, nib3, nib4);
 			break;
 		case 0xE:
@@ -224,7 +271,7 @@ void cpu_cycle() {
 					}
 					break;
 				case 0x0A:
-					while(1);
+					//while(1);
 					//TODO WAIT FOR KEY
 					break;
 				case 0x29:
@@ -236,29 +283,23 @@ void cpu_cycle() {
 					memory_g[IR_g+2] = value(nib2) % 10;
 					break;
 				case 0x55:
-					memory_g[IR_g] = value(0);
-					memory_g[IR_g+1] = value(1);
-					memory_g[IR_g+2] = value(2);
-					memory_g[IR_g+3] = value(3);
-					memory_g[IR_g+4] = value(4);
-					memory_g[IR_g+5] = value(5);
-					memory_g[IR_g+6] = value(6);
-					memory_g[IR_g+7] = value(7);
-					//TODO Old support
+					int i;
+					for(i = 0; i <= nib2; i++, IR_g++) {
+						memory_g[IR_g] = value(i);
+					}
+					if(!adjustIR_g) IR_g-=i;
 					break;
 				case 0x65:
-					set(0, memory_g[IR_g]);
-					set(1, memory_g[IR_g+1]);
-					set(2, memory_g[IR_g+2]);
-					set(3, memory_g[IR_g+3]);
-					set(4, memory_g[IR_g+4]);
-					set(5, memory_g[IR_g+5]);
-					set(6, memory_g[IR_g+6]);
-					set(7, memory_g[IR_g+7]);
+					int j;
+					for(j = 0; j <= nib2; j++, IR_g++) {
+						set(j, memory_g[IR_g]);
+					}
+					if(!adjustIR_g) IR_g-=j;
 					break;
 			}
 			break;
 	}
+	printf("\n");
 }
 
 

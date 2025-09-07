@@ -6,21 +6,30 @@
 #include "globals.h"
 #include "util.h"
 
-clock_t next = 0;
+clock_t next_tick = 0;
+clock_t next_9inst = 0;
 
 void onEvent(SDL_Event event) {
 
 }
 
 void onFrame() {
-	cpu_cycle();
-	ppu_update();
-	while(next <= clock()) {
+	while(next_tick <= clock()) {
 		if(DT_g>0) DT_g -= 1;
 		if(ST_g>0) ST_g -= 1;
-		next = clock() + (CLOCKS_PER_SEC/60);
+		next_tick = clock() + (CLOCKS_PER_SEC/60);
 	}
-	//SDL_Delay(100);
+
+	while(next_9inst <= clock()) {
+		cpu_cycle();
+		cpu_cycle();
+		cpu_cycle();
+		cpu_cycle();
+		cpu_cycle();
+		next_9inst = clock() + (CLOCKS_PER_SEC/100);
+	}
+
+	ppu_update();
 }
 
 int main(int argc, char * argv[]) {
