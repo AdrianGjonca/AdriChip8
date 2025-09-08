@@ -9,7 +9,7 @@ int adjustIR_g = 0;
 int amigaquirk_g = 0;
 
 int isWaiting_g = 0;
-int waitingFor_g = 0;
+int wait_for_key_g = 0;
 
 #define DEBUG 0
 
@@ -89,38 +89,28 @@ void set(int reg, uint8_t val) {
 }
 
 void cpu_cycle() {
-	if(isWaiting_g) {
-		switch(waitingFor_g) {
-			case 0x0: if(key0_g) isWaiting_g = 0; break;
-			case 0x1: if(key1_g) isWaiting_g = 0; break;
-			case 0x2: if(key2_g) isWaiting_g = 0; break;
-			case 0x3: if(key3_g) isWaiting_g = 0; break;
+	if(wait_for_key_g) {
+		if(key0_g) {VF_g = 0x0; wait_for_key_g = 0;}
+		if(key1_g) {VF_g = 0x1; wait_for_key_g = 0;}
+		if(key2_g) {VF_g = 0x2; wait_for_key_g = 0;}
+		if(key3_g) {VF_g = 0x3; wait_for_key_g = 0;}
 
-			case 0x4: if(key4_g) isWaiting_g = 0; break;
-			case 0x5: if(key5_g) isWaiting_g = 0; break;
-			case 0x6: if(key6_g) isWaiting_g = 0; break;
-			case 0x7: if(key7_g) isWaiting_g = 0; break;
-					  
-			case 0x8: if(key8_g) isWaiting_g = 0; break;
-			case 0x9: if(key9_g) isWaiting_g = 0; break;
-			case 0xA: if(keyA_g) isWaiting_g = 0; break;
-			case 0xB: if(keyB_g) isWaiting_g = 0; break;
+		if(key4_g) {VF_g = 0x4; wait_for_key_g = 0;}
+		if(key5_g) {VF_g = 0x5; wait_for_key_g = 0;}
+		if(key6_g) {VF_g = 0x6; wait_for_key_g = 0;}
+		if(key7_g) {VF_g = 0x7; wait_for_key_g = 0;}
 
-			case 0xC: if(keyC_g) isWaiting_g = 0; break;
-			case 0xD: if(keyD_g) isWaiting_g = 0; break;
-			case 0xE: if(keyE_g) isWaiting_g = 0; break;
-			case 0xF: if(keyF_g) isWaiting_g = 0; break;
-		}
-		if(isWaiting_g) {
-#if DEBUG
-			printf("WAITING FOR KEY %01X\n", waitingFor_g);
-#endif
-			return;
-		}else{
-#if DEBUG
-			printf("Key %01X has been recieved! Resuming execution.\n", waitingFor_g);
-#endif
-		}
+		if(key8_g) {VF_g = 0x8; wait_for_key_g = 0;}
+		if(key9_g) {VF_g = 0x9; wait_for_key_g = 0;}
+		if(keyA_g) {VF_g = 0xA; wait_for_key_g = 0;}
+		if(keyB_g) {VF_g = 0xB; wait_for_key_g = 0;}
+
+		if(keyC_g) {VF_g = 0xC; wait_for_key_g = 0;}
+		if(keyD_g) {VF_g = 0xD; wait_for_key_g = 0;}
+		if(keyE_g) {VF_g = 0xE; wait_for_key_g = 0;}
+		if(keyF_g) {VF_g = 0xF; wait_for_key_g = 0;}
+
+		if(wait_for_key_g) return;
 	}
 
 	//FETCH
@@ -409,8 +399,7 @@ void cpu_cycle() {
 					}
 					break;
 				case 0x0A:
-					waitingFor_g = value(nib2);
-					isWaiting_g = 1;
+					wait_for_key_g = 1;
 					break;
 				case 0x29:
 					IR_g = value(nib2) * 5 + FONT_START;
