@@ -66,7 +66,9 @@ extern int jumpquirk_g;
 extern int adjustIR_g;
 extern int amigaquirk_g;
 extern int isWaiting_g;
-extern int waitingFor_g;
 extern void cpu_cycle();
+
+//EXTERNS: renderer.c
+extern int speaker_g;
 
 #endif

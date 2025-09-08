@@ -9,7 +9,7 @@ int adjustIR_g = 0;
 int amigaquirk_g = 0;
 
 int isWaiting_g = 0;
-int waitingFor_g = 0;
+int wait_for_key_g = 0;
 
 #define DEBUG 0
 
@@ -89,38 +89,28 @@ void set(int reg, uint8_t val) {
 }
 
 void cpu_cycle() {
-	if(isWaiting_g) {
-		switch(waitingFor_g) {
-			case 0x0: if(key0_g) isWaiting_g = 0; break;
-			case 0x1: if(key1_g) isWaiting_g = 0; break;
-			case 0x2: if(key2_g) isWaiting_g = 0; break;
-			case 0x3: if(key3_g) isWaiting_g = 0; break;
+	if(wait_for_key_g) {
+		if(key0_g) {VF_g = 0x0; wait_for_key_g = 0;}
+		if(key1_g) {VF_g = 0x1; wait_for_key_g = 0;}
+		if(key2_g) {VF_g = 0x2; wait_for_key_g = 0;}
+		if(key3_g) {VF_g = 0x3; wait_for_key_g = 0;}
 
-			case 0x4: if(key4_g) isWaiting_g = 0; break;
-			case 0x5: if(key5_g) isWaiting_g = 0; break;
-			case 0x6: if(key6_g) isWaiting_g = 0; break;
-			case 0x7: if(key7_g) isWaiting_g = 0; break;
-					  
-			case 0x8: if(key8_g) isWaiting_g = 0; break;
-			case 0x9: if(key9_g) isWaiting_g = 0; break;
-			case 0xA: if(keyA_g) isWaiting_g = 0; break;
-			case 0xB: if(keyB_g) isWaiting_g = 0; break;
+		if(key4_g) {VF_g = 0x4; wait_for_key_g = 0;}
+		if(key5_g) {VF_g = 0x5; wait_for_key_g = 0;}
+		if(key6_g) {VF_g = 0x6; wait_for_key_g = 0;}
+		if(key7_g) {VF_g = 0x7; wait_for_key_g = 0;}
 
-			case 0xC: if(keyC_g) isWaiting_g = 0; break;
-			case 0xD: if(keyD_g) isWaiting_g = 0; break;
-			case 0xE: if(keyE_g) isWaiting_g = 0; break;
-			case 0xF: if(keyF_g) isWaiting_g = 0; break;
-		}
-		if(isWaiting_g) {
-#if DEBUG
-			printf("WAITING FOR KEY %01X\n", waitingFor_g);
-#endif
-			return;
-		}else{
-#if DEBUG
-			printf("Key %01X has been recieved! Resuming execution.\n", waitingFor_g);
-#endif
-		}
+		if(key8_g) {VF_g = 0x8; wait_for_key_g = 0;}
+		if(key9_g) {VF_g = 0x9; wait_for_key_g = 0;}
+		if(keyA_g) {VF_g = 0xA; wait_for_key_g = 0;}
+		if(keyB_g) {VF_g = 0xB; wait_for_key_g = 0;}
+
+		if(keyC_g) {VF_g = 0xC; wait_for_key_g = 0;}
+		if(keyD_g) {VF_g = 0xD; wait_for_key_g = 0;}
+		if(keyE_g) {VF_g = 0xE; wait_for_key_g = 0;}
+		if(keyF_g) {VF_g = 0xF; wait_for_key_g = 0;}
+
+		if(wait_for_key_g) return;
 	}
 
 	//FETCH
@@ -144,6 +134,8 @@ void cpu_cycle() {
 	int nib2 = (0x0F00 & operation) >> 8;
 	int nib3 = (0x00F0 & operation) >> 4;
 	int nib4 = (0x000F & operation);
+
+	uint8_t carry_val;
 
 #if DEBUG
 	printf("%01X %01X %01X %01X\n", nib1, nib2, nib3, nib4);
@@ -234,41 +226,46 @@ void cpu_cycle() {
 #if DEBUG
 					printf("Set V%01X to V%01X\n", nib2, nib3);
 #endif
-					set(nib2, nib3);
+					set(nib2, value(nib3));
 					break;
 				case 1: //VX |= VY
 #if DEBUG
 					printf("V%01X |= V%01X\n", nib2, nib3);
 #endif
 					set(nib2, value(nib2) | value(nib3));
+					VF_g = 0;
 					break;
 				case 2: //VX &= VY
 #if DEBUG
 					printf("V%01X &= V%01X\n", nib2, nib3);
 #endif
 					set(nib2, value(nib2) & value(nib3));
+					VF_g = 0;
 					break;
 				case 3: //VX ^= VY
 #if DEBUG
 					printf("V%01X ^= V%01X\n", nib2, nib3);
 #endif
 					set(nib2, value(nib2) ^ value(nib3));
+					VF_g = 0;
 					break;
 				case 4: //VX += VY
 #if DEBUG
 					printf("V%01X += V%01X\n", nib2, nib3);
 #endif
 					int sum = (int) value(nib2) + (int) value(nib3);
-					if(sum > 255) VF_g = 1;
-					else VF_g = 0;
+					if(sum > 255) carry_val = 1;
+					else carry_val = 0;
 					set(nib2, (uint8_t)sum); //Intentional truncation
+					VF_g = carry_val;
 					break;
 				case 5: //VX = VX - VY
 #if DEBUG
 					printf("V%01X -= V%01X\n", nib2, nib3);
 #endif
+					carry_val = value(nib3) <= value(nib2);
 					set(nib2, value(nib2) - value(nib3));
-					VF_g = value(nib2) > value(nib3);
+					VF_g = carry_val;
 					break;
 				case 6: //RSHIFT 
 					if(shift_g == 0) {
@@ -281,8 +278,9 @@ void cpu_cycle() {
 						printf("V%01X = V%01X >> 1\n", nib2, nib2);
 #endif
 					}
-					VF_g = nib2 & 0x01;
+					carry_val = value(nib2) & 0x01;
 					set(nib2, value(nib2) >> 1);
+					VF_g = carry_val;
 					break;				
 				case 7: //VX = VY - VX
 #if DEBUG
@@ -303,8 +301,9 @@ void cpu_cycle() {
 #endif
 					}
 					int shift = (int)value(nib2) << 1;
-					VF_g = shift & 0xFF00 != 0;
+					carry_val = (shift & 0xFF00) != 0;
 					set(nib2, shift);
+					VF_g = carry_val;
 					break;
 			}
 			break;
@@ -400,8 +399,7 @@ void cpu_cycle() {
 					}
 					break;
 				case 0x0A:
-					waitingFor_g = value(nib2);
-					isWaiting_g = 1;
+					wait_for_key_g = 1;
 					break;
 				case 0x29:
 					IR_g = value(nib2) * 5 + FONT_START;

@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include "globals.h"
 
+int speaker_g = 0;
+
 SDL_Window * window;
 SDL_Renderer * renderer;
 SDL_Rect main_rect;
@@ -47,7 +49,11 @@ void renderer_loop(void (*onEvent)(SDL_Event), void (*onFrame)()) {
 			main_rect.h = height - 20;
 			main_rect.w = main_rect.h * 2;
 			main_rect.x += (width / 2) - (main_rect.w / 2);
-		}	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+		}
+		if(!speaker_g)
+			SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+		else
+			SDL_SetRenderDrawColor(renderer, 255, 200, 255, 255);
 		SDL_RenderFillRect(renderer, NULL);
 
 		SDL_Rect border = main_rect;
