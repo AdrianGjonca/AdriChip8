@@ -243,18 +243,21 @@ void cpu_cycle() {
 					printf("V%01X |= V%01X\n", nib2, nib3);
 #endif
 					set(nib2, value(nib2) | value(nib3));
+					VF_g = 0;
 					break;
 				case 2: //VX &= VY
 #if DEBUG
 					printf("V%01X &= V%01X\n", nib2, nib3);
 #endif
 					set(nib2, value(nib2) & value(nib3));
+					VF_g = 0;
 					break;
 				case 3: //VX ^= VY
 #if DEBUG
 					printf("V%01X ^= V%01X\n", nib2, nib3);
 #endif
 					set(nib2, value(nib2) ^ value(nib3));
+					VF_g = 0;
 					break;
 				case 4: //VX += VY
 #if DEBUG
