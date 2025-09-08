@@ -2,68 +2,30 @@
 A simple CHIP-8 emulator made by Adrian Gjonca.
 Written using C and SDL2.
 
-## Notice
-Currently there appears to be multiple major bugs. I suspect they are related to:
-* A: the collision system, and 
-* B: to the input system.
 
-For this reason most games fail to work right now sadly. I plan to return to this project some time soon and fix these bugs but this project is currently on hold due to my wish to work on some other projects of mine.
+<img width="602" height="464" alt="image" src="https://github.com/user-attachments/assets/74c0b4cf-f306-40a8-b16c-b79ec0615480" />
 
-## Compatiblilty
-Games here have been taken from:
-https://johnearnest.github.io/chip8Archive/
+_AdriChip8 running Brick (Brix hack, 1990)_
 
-### Octojam 1 Title
-**WORKING**
+## Building
+Simply run make on the project root directory
+```
+make
+```
+This will generate an executable titled 'adrichip8'
 
-<img width="594" height="315" alt="image" src="https://github.com/user-attachments/assets/d13273ab-b404-422a-b8de-f6e7bf345678" />
+## How to use
+Run the executable with the CHIP-8 rom as its sole argument 
+### \*nix like
+```
+./adrichip8 [path to rom]
+```
+### Windows/ReactOS
+```
+adrichip8 [path to rom]
+```
 
-### RPS
-**Frozen on titlescreen**
-
-<img width="594" height="315" alt="image" src="https://github.com/user-attachments/assets/86f4e351-45dc-4834-9a63-27ea3f01cf2a" />
-
-### Octo: A Chip 8 story
-**Frozen on titlescreen**
-
-<img width="594" height="315" alt="image" src="https://github.com/user-attachments/assets/39d9baf3-ce5f-457b-832b-cd64391531be" />
-
-### Pumpkin "Dreess" up
-**Can't seem to change anything but their eyes/glasses**
-
-<img width="594" height="315" alt="image" src="https://github.com/user-attachments/assets/d13cd1f1-bd2f-4c99-aacf-79b254496af5" />
-
-### Flight Runner
-**Rendering is broken and I cannot move the ship**
-
-<img width="594" height="315" alt="image" src="https://github.com/user-attachments/assets/02108bcd-b1a4-4434-8fa0-b04f7f5eb3ed" />
-
-### Horse World Online
-**WORKING**
-
-<img width="594" height="315" alt="image" src="https://github.com/user-attachments/assets/7e3328c0-08c1-4c38-bfab-132c68956ed4" />
-
-### Br8kout
-**You can move, so can the ball, nothing else is working however...**
-
-<img width="594" height="315" alt="image" src="https://github.com/user-attachments/assets/92f01e52-b34b-4c17-8fbc-00db462d391c" />
-
-### 1D Cellular Automata
-**Nope**
-
-<img width="594" height="315" alt="image" src="https://github.com/user-attachments/assets/b419498e-6ada-411e-9c3c-93ec6a49496c" />
-
-### Snake
-**Broken title screen, Buttons are wrong, Instant game over**
-
-<img width="594" height="315" alt="image" src="https://github.com/user-attachments/assets/61b85728-7f8c-4e7d-8401-d464515add9c" />
-
-### Glitch Ghost
-**Game is broken but introduction seems to work fine**
-
-<img width="594" height="315" alt="image" src="https://github.com/user-attachments/assets/41a6181f-d731-4249-bdf9-7704653c063a" />
-
-
-
-
-
+## Compatability
+This project is in its infancy. while it cleanly passes all tests (Chip8 only) from https://github.com/Timendus/chip8-test-suite, certain games still have noticable bugs.
+Overtime this will improve but this is not a high-priority project for me and hence bugs will not be fixed very quickly.
+However, if you find any bugs please post an issue with information, screen shots and the ROM file and I will attempt to solve them within my abillity.
