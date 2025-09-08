@@ -68,4 +68,7 @@ extern int amigaquirk_g;
 extern int isWaiting_g;
 extern void cpu_cycle();
 
+//EXTERNS: renderer.c
+extern int speaker_g;
+
 #endif

@@ -60,12 +60,12 @@ void onFrame() {
 
 	while(next_9inst <= clock()) {
 		cpu_cycle();
-		cpu_cycle();
-		cpu_cycle();
-		cpu_cycle();
-		cpu_cycle();
-		next_9inst = clock() + (CLOCKS_PER_SEC/100);
+		next_9inst = clock() + (CLOCKS_PER_SEC/500);
 	}
+
+	speaker_g = ST_g > 0;
+	//printf("%d %d\n",(int) ST_g, speaker_g);
+
 	ppu_update();
 }
 
