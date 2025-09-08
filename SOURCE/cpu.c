@@ -145,6 +145,8 @@ void cpu_cycle() {
 	int nib3 = (0x00F0 & operation) >> 4;
 	int nib4 = (0x000F & operation);
 
+	uint8_t carry_val;
+
 #if DEBUG
 	printf("%01X %01X %01X %01X\n", nib1, nib2, nib3, nib4);
 #endif
@@ -234,7 +236,7 @@ void cpu_cycle() {
 #if DEBUG
 					printf("Set V%01X to V%01X\n", nib2, nib3);
 #endif
-					set(nib2, nib3);
+					set(nib2, value(nib3));
 					break;
 				case 1: //VX |= VY
 #if DEBUG
@@ -259,16 +261,18 @@ void cpu_cycle() {
 					printf("V%01X += V%01X\n", nib2, nib3);
 #endif
 					int sum = (int) value(nib2) + (int) value(nib3);
-					if(sum > 255) VF_g = 1;
-					else VF_g = 0;
+					if(sum > 255) carry_val = 1;
+					else carry_val = 0;
 					set(nib2, (uint8_t)sum); //Intentional truncation
+					VF_g = carry_val;
 					break;
 				case 5: //VX = VX - VY
 #if DEBUG
 					printf("V%01X -= V%01X\n", nib2, nib3);
 #endif
+					carry_val = value(nib3) <= value(nib2);
 					set(nib2, value(nib2) - value(nib3));
-					VF_g = value(nib2) > value(nib3);
+					VF_g = carry_val;
 					break;
 				case 6: //RSHIFT 
 					if(shift_g == 0) {
@@ -281,8 +285,9 @@ void cpu_cycle() {
 						printf("V%01X = V%01X >> 1\n", nib2, nib2);
 #endif
 					}
-					VF_g = nib2 & 0x01;
+					carry_val = value(nib2) & 0x01;
 					set(nib2, value(nib2) >> 1);
+					VF_g = carry_val;
 					break;				
 				case 7: //VX = VY - VX
 #if DEBUG
@@ -303,8 +308,9 @@ void cpu_cycle() {
 #endif
 					}
 					int shift = (int)value(nib2) << 1;
-					VF_g = shift & 0xFF00 != 0;
+					carry_val = (shift & 0xFF00) != 0;
 					set(nib2, shift);
+					VF_g = carry_val;
 					break;
 			}
 			break;
