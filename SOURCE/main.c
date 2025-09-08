@@ -60,7 +60,7 @@ void onFrame() {
 
 	while(next_9inst <= clock()) {
 		cpu_cycle();
-		next_9inst = clock() + (CLOCKS_PER_SEC/500);
+		next_9inst = clock() + (CLOCKS_PER_SEC/700);
 	}
 
 	speaker_g = ST_g > 0;
